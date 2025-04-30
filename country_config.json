@@ -1,0 +1,24 @@
+{
+  "korea": {
+    "unique_id_field_name": "사업자등록번호",
+    "common_fields": ["법인명(단체명)", "대표자", "법인등록번호", "사업장소재지", "업태", "종목"],
+    "field_mapping": {
+      "사업자등록번호": "OCR_TAX_ID_NUM",
+      "법인명(단체명)": "OCR_BP_NAME_LOCAL",
+      "대표자": "OCR_REPRE_NAME",
+      "법인등록번호": "OCR_COMP_REG_NUM",
+      "사업장소재지": "OCR_FULL_ADDR_LOCAL",
+      "업태": "OCR_BIZ_TYPE", 
+      "종목": "OCR_INDUSTRY_TYPE" 
+    }
+  },
+  "usa": {
+    "unique_id_field_name": "TIN",
+    "common_fields": ["Legal Name", "Address"],
+    "field_mapping": {
+      "TIN": "OCR_TAX_ID_NUM",
+      "Legal Name": "OCR_BP_NAME_LOCAL",
+      "Address": "OCR_FULL_ADDR_LOCAL"
+    }
+  }
+} 

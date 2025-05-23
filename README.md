@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Document Processing API
 
 ## Description
@@ -256,3 +257,6 @@ _This README has been generated based on an analysis of the project files. Pleas
 
 - country_config 완성할것(DB 데이터 확인)
 - 오류 발생시 자세한 설명 해주는 기능 추가할것(API 호출 시 무언가 잘못 넣었거나, OCR결과에서 확신 못하는 부분이 있거나)
+=======
+https://apidog.com/kr/blog/gemini-2-0-flash-ocr-kr/
+>>>>>>> 619275b31ed1dd26ed371116224ac08a796593f2

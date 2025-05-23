@@ -6,7 +6,7 @@ set GCP_PROJECT_ID=electric-charge-431108-f7
 set GCP_REGION=us-central1
 REM Optional: set MODEL_NAME=gemini-1.5-flash-001
 
-echo Starting FastAPI server locally...
+echo Starting OCR Application...
 echo Using GCP Project: %GCP_PROJECT_ID%
 echo Using GCP Region: %GCP_REGION%
 
@@ -18,8 +18,8 @@ if errorlevel 1 (
 )
 
 REM Run Uvicorn server
-REM Use port 8080 for local testing
-uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+REM Use port 8000 for local testing
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 
 echo.
 echo Note: Ensure you have run 'gcloud auth application-default login' previously.

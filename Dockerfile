@@ -28,6 +28,14 @@ COPY . .
 # Use --host 0.0.0.0 to listen on all available network interfaces.
 # Uvicorn handles concurrency well; --workers can be added for multi-process if needed,
 # but start with the default single worker, multiple threads managed by the event loop.
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--timeout-keep-alive", "120"]
+# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--timeout-keep-alive", "120"]
 # Note: Uvicorn uses $PORT automatically if available, but explicitly setting it avoids ambiguity.
 # Timeout is set via --timeout-keep-alive. 
+
+# Use Gunicorn as the process manager for Uvicorn workers for production
+# -w 4: Number of worker processes. A common starting point is (2 * number_of_cores) + 1. Adjust based on your Cloud Run instance CPU.
+# -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn-managed workers.
+# --bind 0.0.0.0:8080: Listen on port 8080 on all interfaces. Cloud Run will map to this.
+# --timeout 120: Gunicorn's worker timeout in seconds.
+# Gunicorn will also respect the PORT environment variable set by Cloud Run if --bind is not 0.0.0.0:$PORT or similar.
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app:app", "--bind", "0.0.0.0:8080", "--timeout", "120"] 

@@ -4,10 +4,11 @@ from typing import Dict, Any, Optional
 import logging
 import os
 
-from models import StandardBusinessLicenseResponse
+from models import StandardBusinessLicenseResponse, DynamicReceiptResponse
 from services.file_processor import FileProcessor
 from services.gemini_service import GeminiService
 from services.business_license_processor import BusinessLicenseProcessor
+from services.receipt_processor import ReceiptProcessor
 from utils.error_handlers import APIError, handle_api_error, handle_http_exception
 from config import load_config
 
@@ -21,7 +22,7 @@ LOADED_COUNTRY_CONFIG: Dict[str, Any] = {}
 # Initialize FastAPI app
 app = FastAPI(
     title="Document Processing API",
-    description="API for processing various document types including business licenses",
+    description="API for processing various document types including business licenses and receipts",
     version="1.0.0"
 )
 
@@ -60,6 +61,12 @@ def get_business_license_processor(
         # Fallback or raise an error, for now, pass it as is but it will likely fail in the processor
     return BusinessLicenseProcessor(file_processor, gemini_service, LOADED_COUNTRY_CONFIG)
 
+def get_receipt_processor(
+    file_processor: FileProcessor = Depends(get_file_processor),
+    gemini_service: GeminiService = Depends(get_gemini_service)
+) -> ReceiptProcessor:
+    return ReceiptProcessor(file_processor, gemini_service)
+
 # --- Startup Event ---
 @app.on_event("startup")
 async def startup_event():
@@ -87,6 +94,11 @@ async def startup_event():
         raise
 
 # --- Endpoints ---
+@app.get("/health", status_code=200, tags=["Health"])
+async def health_check():
+    """Perform a health check."""
+    return {"status": "ok"}
+
 @app.post("/process-business-license", response_model=StandardBusinessLicenseResponse)
 async def process_business_license(
     file: UploadFile = File(...),
@@ -104,4 +116,21 @@ async def process_business_license(
     Returns:
         Dict containing extracted fields and processing metadata
     """
-    return await processor.process(file, country=country) 
+    return await processor.process(file, country=country)
+
+@app.post("/process-receipt", response_model=DynamicReceiptResponse)
+async def process_receipt(
+    file: UploadFile = File(...),
+    processor: ReceiptProcessor = Depends(get_receipt_processor)
+) -> Dict[str, Any]:
+    """
+    Extract key fields from receipt documents using dynamic LLM-determined structure.
+    
+    Args:
+        file: The uploaded document file (image or PDF)
+        processor: ReceiptProcessor instance
+    
+    Returns:
+        Dict containing extracted receipt fields in a structure determined by the LLM
+    """
+    return await processor.process(file) 

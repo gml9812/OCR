@@ -91,9 +91,9 @@ class GeminiService:
 
             # Original GenerationConfig object
             current_generation_config_obj = types.GenerationConfig(
-                temperature=0.1,  # Lowered for more deterministic OCR
-                top_p=0.9,        # Slightly increased for OCR focus
-                top_k=10          # Reduced for OCR focus with low temperature
+                temperature=0.0,  
+                top_p=1,       
+                top_k=1          
             )
             
             # Original safety_settings dictionary

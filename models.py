@@ -37,4 +37,18 @@ class StandardBusinessLicenseResponse(BaseModel):
     OCR_COMP_REG_NUM: Optional[str] = None
     OCR_FULL_ADDR_LOCAL: Optional[str] = None
     OCR_BIZ_TYPE: Optional[str] = None
-    OCR_INDUSTRY_TYPE: Optional[str] = None 
+    OCR_INDUSTRY_TYPE: Optional[str] = None
+
+class DynamicReceiptResponse(BaseModel):
+    """
+    Dynamic response model for receipt processing.
+    The LLM determines the optimal JSON structure based on the receipt content.
+    """
+    class Config:
+        # Allow any additional fields that the LLM might return
+        extra = "allow"
+    
+    # We can define some common fields that might be present, but they're all optional
+    # since the LLM will determine the actual structure
+    def __init__(self, **data):
+        super().__init__(**data) 

@@ -1,14 +1,14 @@
-<<<<<<< HEAD
 # Document Processing API
 
 ## Description
 
-This project provides a **Document Processing API** built with FastAPI, designed to extract structured information from various document types, with a primary focus on **Business Licenses**. It leverages Google's Gemini multimodal AI models via the `google-genai` SDK for OCR and information extraction.
+This project provides a **Document Processing API** built with FastAPI, designed to extract structured information from various document types, with a primary focus on **Business Licenses** and **Receipts**. It leverages Google's Gemini multimodal AI models via the `google-genai` SDK for OCR and information extraction.
 
-**Purpose:** To automate the extraction of key information from business license documents from different countries, providing a standardized JSON output. The system is designed to be configurable for various country-specific document formats and fields.
+**Purpose:** To automate the extraction of key information from business license documents from different countries and receipt documents, providing a standardized JSON output. The system is designed to be configurable for various country-specific document formats and fields.
 
 **Key functionalities include:**
 -   FastAPI endpoint (`/process-business-license`) for uploading business license documents (PDF, PNG, JPG, TIFF).
+-   FastAPI endpoint (`/process-receipt`) for uploading receipt documents (PDF, PNG, JPG, TIFF).
 -   Automatic conversion of PDFs (first page) and various image formats to a processable image format (JPEG/PNG).
 -   Integration with Google Gemini for OCR and structured data extraction based on dynamic, country-specific prompts and schemas.
 -   Configuration-driven approach using `country_config.json` to define fields and prompts for different countries (e.g., Korea, USA).
@@ -172,6 +172,65 @@ curl -X POST "http://localhost:8080/process-business-license" \
   -F "country=korea"
 ```
 
+### Process Receipt
+
+-   **Endpoint:** `POST /process-receipt`
+-   **Description:** Extracts key fields from an uploaded receipt document using AI-determined optimal JSON structure.
+-   **Request:** `multipart/form-data`
+    -   `file`: The document file (PDF, PNG, JPG, JPEG, TIFF, TIF).
+-   **Response:** `application/json`
+    -   On success (200 OK): A JSON object containing the extracted receipt fields. The structure is dynamically determined by the AI based on the receipt content for optimal data organization.
+        ```json
+        {
+          "merchant": {
+            "name": "Example Store",
+            "address": "123 Main St, City, State",
+            "phone": "555-123-4567"
+          },
+          "transaction": {
+            "date": "2024-01-15",
+            "time": "14:30",
+            "receipt_number": "REC-001234"
+          },
+          "items": [
+            {
+              "name": "Coffee",
+              "quantity": 2,
+              "unit_price": 2.25,
+              "total": 4.50
+            },
+            {
+              "name": "Sandwich",
+              "quantity": 1,
+              "unit_price": 8.99,
+              "total": 8.99
+            }
+          ],
+          "totals": {
+            "subtotal": 23.69,
+            "tax": 2.30,
+            "total": 25.99,
+            "currency": "USD"
+          },
+          "payment": {
+            "method": "Credit Card"
+          }
+        }
+        ```
+        *Note: The actual JSON structure will vary based on the receipt content and what the AI determines is the most logical organization.*
+    -   On error (4xx/5xx): A JSON object with a "detail" field describing the error.
+        ```json
+        {
+          "detail": "Error message"
+        }
+        ```
+
+**Example `curl` request:**
+```bash
+curl -X POST "http://localhost:8080/process-receipt" \
+  -F "file=@/path/to/your/receipt.jpg"
+```
+
 ## Project Structure
 
 ```
@@ -199,19 +258,21 @@ curl -X POST "http://localhost:8080/process-business-license" \
     └── response_parser.py    # Utility for parsing JSON responses (used by DocumentProcessor)
 ```
 
--   `app.py`: Initializes the FastAPI app, sets up CORS, error handlers, and the `/process-business-license` endpoint. Loads configuration on startup.
+-   `app.py`: Initializes the FastAPI app, sets up CORS, error handlers, and the `/process-business-license` and `/process-receipt` endpoints. Loads configuration on startup.
 -   `config.py`: Manages loading of `country_config.json` and environment variables.
 -   `country_config.json`: Defines country-specific schemas and field names for OCR. **This is a key file to modify when adding support for new countries or fields.**
 -   `services/business_license_processor.py`: The core logic for handling a business license. It uses `FileProcessor` to prepare the document and `GeminiService` to perform OCR and data extraction based on the prompt generated from `country_config.json`.
+-   `services/receipt_processor.py`: The core logic for handling receipts. It uses `FileProcessor` to prepare the document and `GeminiService` to perform OCR and data extraction with a dynamic JSON structure determined by the AI.
 -   `services/file_processor.py`: Validates file types (PDF, various images) and converts them into a usable format (PNG bytes for PDFs, original bytes for images) for the OCR service.
 -   `services/gemini_service.py`: Encapsulates all interactions with the Google Gemini API, including authentication (via ADC), request formatting, and response handling. Configures safety settings and generation parameters.
--   `models.py`: Contains Pydantic models like `StandardBusinessLicenseResponse` to define the expected structure of API responses.
+-   `models.py`: Contains Pydantic models like `StandardBusinessLicenseResponse` and `DynamicReceiptResponse` to define the expected structure of API responses.
 -   `Dockerfile`: Specifies how to build the production Docker image, using `python:3.11-slim` and running Uvicorn.
 -   `utils/error_handlers.py`: Defines custom exception handlers for API errors.
 
 ## Key Features Detailed
 
 -   **Dynamic Country Configuration:** Supports different business license formats and required fields per country through `country_config.json`. New countries can be added by defining their specific `gemini_ocr_schema` and field names.
+-   **Intelligent Receipt Processing:** The receipt endpoint uses AI to determine the optimal JSON structure based on the actual receipt content, providing more natural and useful data organization compared to fixed schemas.
 -   **Multimodal Input:** Accepts PDF documents (first page is processed) and common image formats (PNG, JPEG, TIFF).
 -   **Gemini Integration:** Leverages Google's Gemini models for advanced OCR and structured data extraction. The prompt sent to Gemini is dynamically constructed based on the `gemini_ocr_schema` for the target country.
 -   **Standardized Output:** Aims to provide a consistent JSON output structure (`OCR_FIELD_NAME` keys) for extracted data, regardless of the input document's country of origin (as defined in the schema).
@@ -257,6 +318,3 @@ _This README has been generated based on an analysis of the project files. Pleas
 
 - country_config 완성할것(DB 데이터 확인)
 - 오류 발생시 자세한 설명 해주는 기능 추가할것(API 호출 시 무언가 잘못 넣었거나, OCR결과에서 확신 못하는 부분이 있거나)
-=======
-https://apidog.com/kr/blog/gemini-2-0-flash-ocr-kr/
->>>>>>> 619275b31ed1dd26ed371116224ac08a796593f2

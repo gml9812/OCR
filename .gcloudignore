@@ -1,0 +1,46 @@
+# .gcloudignore - Files to exclude from Cloud Build
+
+# Git files
+.git/
+.gitignore
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+.env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files and local development
+test_*.py
+*_test.py
+tests/
+test_receipt.png
+
+# Local run scripts (not needed in container)
+run_local.*
+
+# Documentation (not needed in container)
+README.md
+
+# Deployment scripts (not needed in container)
+deploy_to_cloudrun.*
+
+# Local environment files
+.env
+.env.local 

@@ -139,6 +139,125 @@ This file loads `country_config.json` and sets up global configuration from envi
 
 The API will be accessible at `http://localhost:8080`.
 
+### Deploying to Google Cloud Run
+
+This application is optimized for deployment on Google Cloud Run. Follow these steps:
+
+#### Prerequisites
+
+1. **Google Cloud SDK**: Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+2. **Authentication**: Run `gcloud auth login` to authenticate
+3. **Project Setup**: Ensure you have a GCP project with billing enabled
+4. **APIs**: The deployment script will enable required APIs automatically
+
+#### Quick Deployment
+
+**Option 1: Using the automated script (Recommended)**
+
+For Linux/macOS:
+```bash
+chmod +x deploy_to_cloudrun.sh
+./deploy_to_cloudrun.sh
+```
+
+For Windows (PowerShell):
+```powershell
+.\deploy_to_cloudrun.ps1
+```
+
+**Option 2: Manual deployment**
+
+1. **Set your project ID**:
+   ```bash
+   export PROJECT_ID="your-gcp-project-id"
+   gcloud config set project $PROJECT_ID
+   ```
+
+2. **Enable required APIs**:
+   ```bash
+   gcloud services enable cloudbuild.googleapis.com
+   gcloud services enable run.googleapis.com
+   gcloud services enable aiplatform.googleapis.com
+   ```
+
+3. **Build and deploy**:
+   ```bash
+   # Build the container image
+   gcloud builds submit --tag gcr.io/$PROJECT_ID/document-processing-api
+   
+   # Deploy to Cloud Run
+   gcloud run deploy document-processing-api \
+       --image gcr.io/$PROJECT_ID/document-processing-api \
+       --platform managed \
+       --region us-central1 \
+       --allow-unauthenticated \
+       --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,MODEL_NAME=gemini-2.0-flash-001" \
+       --memory=2Gi \
+       --cpu=2 \
+       --timeout=300 \
+       --max-instances=10 \
+       --min-instances=0
+   ```
+
+#### Configuration Options
+
+The deployment includes these optimized settings for document processing:
+
+- **Memory**: 2GB (sufficient for image processing and AI model calls)
+- **CPU**: 2 vCPUs (good balance for concurrent requests)
+- **Timeout**: 300 seconds (allows for longer AI processing times)
+- **Scaling**: 0-10 instances (cost-effective auto-scaling)
+- **Authentication**: Public access (change `--allow-unauthenticated` to `--no-allow-unauthenticated` for private access)
+
+#### Environment Variables
+
+The following environment variables are automatically set during deployment:
+
+- `GCP_PROJECT_ID`: Your Google Cloud project ID
+- `GCP_REGION`: The region where your service is deployed
+- `MODEL_NAME`: The Gemini model to use (default: `gemini-2.0-flash-001`)
+
+#### Post-Deployment
+
+After successful deployment, you'll receive a service URL. Test your endpoints:
+
+```bash
+# Health check
+curl https://your-service-url/health
+
+# Process business license
+curl -X POST "https://your-service-url/process-business-license" \
+  -F "file=@your-license.pdf" \
+  -F "country=korea"
+
+# Process receipt
+curl -X POST "https://your-service-url/process-receipt" \
+  -F "file=@your-receipt.jpg"
+```
+
+#### Monitoring and Logs
+
+- **View logs**: `gcloud run services logs tail document-processing-api --region us-central1`
+- **Cloud Console**: Visit the [Cloud Run console](https://console.cloud.google.com/run) to monitor your service
+- **Metrics**: Monitor request count, latency, and error rates in the console
+
+#### Cost Optimization
+
+Cloud Run charges only for actual usage. To optimize costs:
+
+- Set `--min-instances=0` for automatic scaling to zero when not in use
+- Adjust `--max-instances` based on expected traffic
+- Monitor usage in the Cloud Console and adjust resources as needed
+
+#### Security Considerations
+
+For production deployments:
+
+1. **Remove public access**: Use `--no-allow-unauthenticated` and implement proper authentication
+2. **Use IAM**: Set up proper IAM roles for service access
+3. **Environment variables**: Use Google Secret Manager for sensitive configuration
+4. **VPC**: Deploy in a VPC for network isolation if needed
+
 ## API Endpoint
 
 ### Process Business License
@@ -315,6 +434,7 @@ _This README has been generated based on an analysis of the project files. Pleas
 
 
 
-
+## 메모
 - country_config 완성할것(DB 데이터 확인)
+- 대량의 테스트 준비할것
 - 오류 발생시 자세한 설명 해주는 기능 추가할것(API 호출 시 무언가 잘못 넣었거나, OCR결과에서 확신 못하는 부분이 있거나)

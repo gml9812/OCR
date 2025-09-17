@@ -14,11 +14,13 @@ This guide provides step-by-step instructions for deploying the Document Process
 ### One-Click Deployment
 
 **Windows (PowerShell):**
+
 ```powershell
 .\deploy_to_cloudrun.ps1
 ```
 
 **Linux/macOS:**
+
 ```bash
 chmod +x deploy_to_cloudrun.sh
 ./deploy_to_cloudrun.sh
@@ -59,7 +61,7 @@ gcloud run deploy document-processing-api \
     --platform managed \
     --region us-central1 \
     --allow-unauthenticated \
-    --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,MODEL_NAME=gemini-2.0-flash-001" \
+    --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,MODEL_NAME=gemini-2.5-flash" \
     --memory=2Gi \
     --cpu=2 \
     --timeout=300 \
@@ -71,13 +73,13 @@ gcloud run deploy document-processing-api \
 
 ### Resource Allocation
 
-| Setting | Value | Reason |
-|---------|-------|--------|
-| Memory | 2GB | Sufficient for image processing and AI calls |
-| CPU | 2 vCPUs | Good balance for concurrent requests |
-| Timeout | 300s | Allows for longer AI processing times |
-| Max Instances | 10 | Prevents runaway scaling costs |
-| Min Instances | 0 | Scales to zero when not in use |
+| Setting       | Value   | Reason                                       |
+| ------------- | ------- | -------------------------------------------- |
+| Memory        | 2GB     | Sufficient for image processing and AI calls |
+| CPU           | 2 vCPUs | Good balance for concurrent requests         |
+| Timeout       | 300s    | Allows for longer AI processing times        |
+| Max Instances | 10      | Prevents runaway scaling costs               |
+| Min Instances | 0       | Scales to zero when not in use               |
 
 ### Environment Variables
 
@@ -85,7 +87,7 @@ The deployment automatically sets:
 
 - `GCP_PROJECT_ID`: Your Google Cloud project ID
 - `GCP_REGION`: Deployment region (us-central1)
-- `MODEL_NAME`: Gemini model (gemini-2.0-flash-001)
+- `MODEL_NAME`: Gemini model (gemini-2.5-flash)
 
 ### Security Settings
 
@@ -116,16 +118,19 @@ curl -X POST "$SERVICE_URL/process-receipt" \
 ## 📊 Monitoring and Maintenance
 
 ### View Logs
+
 ```bash
 gcloud run services logs tail document-processing-api --region us-central1
 ```
 
 ### Monitor Performance
+
 - Visit [Cloud Run Console](https://console.cloud.google.com/run)
 - Monitor request count, latency, and error rates
 - Set up alerts for high error rates or latency
 
 ### Update Deployment
+
 ```bash
 # After making code changes
 gcloud builds submit --tag gcr.io/$PROJECT_ID/document-processing-api
@@ -137,25 +142,31 @@ gcloud run deploy document-processing-api \
 ## 💰 Cost Optimization
 
 ### Pricing Model
+
 Cloud Run charges for:
+
 - CPU and memory usage during request processing
 - Number of requests
 - Networking (minimal for most use cases)
 
 ### Cost-Saving Tips
+
 1. **Auto-scaling**: Set `--min-instances=0` to scale to zero
 2. **Right-sizing**: Monitor usage and adjust CPU/memory if needed
 3. **Request optimization**: Optimize image sizes before processing
 4. **Caching**: Implement caching for repeated requests
 
 ### Estimated Costs
+
 For typical usage (100 requests/day, 30s avg processing time):
+
 - **Monthly cost**: ~$5-15 USD
 - **Per request**: ~$0.001-0.003 USD
 
 ## 🔒 Production Security
 
 ### Authentication
+
 ```bash
 # Deploy with authentication required
 gcloud run deploy document-processing-api \
@@ -165,6 +176,7 @@ gcloud run deploy document-processing-api \
 ```
 
 ### IAM Setup
+
 ```bash
 # Allow specific users/service accounts
 gcloud run services add-iam-policy-binding document-processing-api \
@@ -174,6 +186,7 @@ gcloud run services add-iam-policy-binding document-processing-api \
 ```
 
 ### Environment Variables Security
+
 For sensitive data, use Google Secret Manager:
 
 ```bash
@@ -191,21 +204,25 @@ gcloud run deploy document-processing-api \
 ### Common Issues
 
 **Build Failures:**
+
 - Check `.gcloudignore` excludes unnecessary files
 - Verify all dependencies in `requirements.txt`
 - Ensure Dockerfile syntax is correct
 
 **Deployment Failures:**
+
 - Verify APIs are enabled
 - Check IAM permissions
 - Ensure project billing is enabled
 
 **Runtime Errors:**
+
 - Check logs: `gcloud run services logs tail document-processing-api`
 - Verify environment variables are set correctly
 - Test locally first with Docker
 
 **Performance Issues:**
+
 - Increase memory/CPU allocation
 - Check for memory leaks in logs
 - Monitor request patterns
@@ -231,7 +248,8 @@ gcloud run deploy document-processing-api \
 ---
 
 **Next Steps:**
+
 - Set up monitoring and alerting
 - Implement authentication for production
 - Configure custom domain if needed
-- Set up CI/CD pipeline for automated deployments 
+- Set up CI/CD pipeline for automated deployments

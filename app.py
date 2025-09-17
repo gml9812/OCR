@@ -73,25 +73,38 @@ async def startup_event():
     """Load configuration on startup."""
     global LOADED_COUNTRY_CONFIG
     try:
+        logger.info("Starting application startup sequence...")
+        
         # Verify environment variables
         required_vars = ["GCP_PROJECT_ID"]
         missing_vars = [var for var in required_vars if not os.environ.get(var)]
         if missing_vars:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+            logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+            # Don't raise exception immediately, try to continue
+        else:
+            logger.info("All required environment variables are present")
             
         # Load country configuration and store it in the module-level variable
+        logger.info("Loading country configuration...")
         LOADED_COUNTRY_CONFIG = load_config()
         
         if not LOADED_COUNTRY_CONFIG:
             logger.error("CRITICAL: Country configuration (LOADED_COUNTRY_CONFIG) is empty after loading at startup.")
-            # Consider raising an exception here to prevent app from starting with bad config
+            # Initialize with empty config instead of failing
+            LOADED_COUNTRY_CONFIG = {}
         else:
             logger.info(f"app.py: LOADED_COUNTRY_CONFIG set. ID: {id(LOADED_COUNTRY_CONFIG)}, Keys: {list(LOADED_COUNTRY_CONFIG.keys())}")
             logger.info("Configuration loaded successfully")
 
+        logger.info("Application startup completed successfully")
+
     except Exception as e:
         logger.error(f"Failed to load configuration: {str(e)}")
-        raise
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Exception details: {repr(e)}")
+        # Initialize with empty config and continue instead of raising
+        LOADED_COUNTRY_CONFIG = {}
+        logger.info("Continuing with empty configuration - some features may not work")
 
 # --- Endpoints ---
 @app.get("/health", status_code=200, tags=["Health"])

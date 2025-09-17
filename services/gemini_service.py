@@ -18,7 +18,7 @@ class GeminiService:
     
     # self.client will now be an instance of google.genai.Client
     client: Optional[genai.Client] = None 
-    model_name_str: str # To store the short model name like 'gemini-2.0-flash-001'
+    model_name_str: str # To store the short model name like 'gemini-2.5-flash'
 
     def __init__(
         self,
@@ -32,7 +32,7 @@ class GeminiService:
         Args:
             project_id: GCP project ID.
             region: GCP location (e.g., 'us-central1').
-            model_name: Model name to use (e.g., 'gemini-2.0-flash-001').
+            model_name: Model name to use (e.g., 'gemini-2.5-flash').
         """
         used_project_id = project_id or os.environ.get("GCP_PROJECT_ID")
         if not used_project_id:
@@ -40,7 +40,7 @@ class GeminiService:
             
         used_location = region or os.environ.get("GCP_REGION", "us-central1")
         
-        self.model_name_str = model_name or os.environ.get("MODEL_NAME", "gemini-2.0-flash-001")
+        self.model_name_str = model_name or os.environ.get("MODEL_NAME", "gemini-2.5-flash")
         
         try:
             logger.info(f"Initializing google-genai Client for Vertex AI. Project: {used_project_id}, Location: {used_location}")

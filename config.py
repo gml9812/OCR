@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Environment variables
 GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 GCP_REGION = os.environ.get("GCP_REGION", "us-central1")
-MODEL_NAME = os.environ.get("MODEL_NAME", "gemini-2.0-flash-001")
+MODEL_NAME = os.environ.get("MODEL_NAME", "gemini-2.5-flash")
 CONFIG_FILE = "country_config.json"
 
 # Global variable to hold loaded config
